@@ -18,6 +18,7 @@ class Building{
       if(!this.isDestroyed){
         push();
         translate(0, height+this.height/2);
+        //color buildings by health
         if(this.health < buildingHealth){
           if(this.health/buildingHealth <= .25){
             fill(255, 0, 0);
@@ -27,6 +28,7 @@ class Building{
             fill(0, 255, 0);
           }
         } else {fill(0);}
+
         rectMode(CENTER);
         rect(this.pos, -this.height, this.width, this.height);
         pop();

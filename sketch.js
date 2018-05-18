@@ -3,37 +3,45 @@ var bullets = [];
 var buildings = [];
 var rockets = [];
 var numRockets = 5;
+var maxRocketsOnScreen = 5;
 var numBuildings = 4;
 var rocketMaxSpeed = 5;
 var buildingHealth = 4;
 var score = 0;
 var increment = 10;
 var isGameOver = false;
-
+var closestRocket;
 
 function setup(){
   createCanvas(800, 800);
   frameRate(60);
+
+  //Create buildings
   for(var i = 0; i < numBuildings; i++){
     buildings.push(new Building(100+width/numBuildings * i));
   }
 
+  //Create initial rockets
   for(var i = 0; i < numRockets; i++){
     rockets.push(new Rocket());
   }
 }
 
+//Run every frame
 function draw(){
+  //Add new rocket every 1000 frames
   if(frameCount%1000 == 0){
     numRockets += 1;
+    constrain(numRockets, 0, maxRocketsOnScreen) //restrict number of rockets
   }
 
 
-  //Game Over scenario
+  //Game Over scenario - all buildings destroyed
   if(buildings.length == 0){
     isGameOver = true;
   }
 
+  //Game Over scenario - gun is hit
   for(var i = 0; i < rockets.length; i++){
     d = dist(rockets[i].pos.x, rockets[i].pos.y, width/2, height)
     if(d <= rockets[i].width){
@@ -85,6 +93,14 @@ function draw(){
   updateAndDraw(buildings);
   updateAndDraw(rockets);
 
+  closestRocket = calcClosestRocket();
+
+
+  //// Debug
+  if(frameCount%100 == 0){
+    console.log(closestRocket);
+  }
+  
   //display score in top left corner
   textSize(32);
   fill(0);
@@ -105,10 +121,6 @@ function draw(){
 
 
 
-
-
-
-
 // if object in array a goes outside the border of the window + a margin (account for rocket start above the screen), remove it from the array
 function isOffscreen(a){
   var margin = 100;
@@ -117,6 +129,16 @@ function isOffscreen(a){
       a.splice(a.indexOf(a[i]), 1);
     }
   }
+}
+
+function calcClosestRocket(){
+  let best = rockets[0];
+  for(let i = 0; i < rockets.length; i++){
+    if(rockets[i].distFromGun < best.distFromGun){
+      best = rockets[i];
+    }
+  }
+  return best
 }
 
 //run all update and show ojects within an array a

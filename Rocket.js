@@ -5,12 +5,14 @@ class Rocket{
     this.vel = p5.Vector.random2D();
     this.vel.y = Math.floor(random(1, rocketMaxSpeed));
     this.pos = createVector(random(0,width), random(-50, 0));
+    this.distFromGun = 0
 
   }
 
   update(){
     this.pos.add(this.vel);
     this.hasCollided();
+    this.calcGunDistance();
   }
 
   hasCollided(){
@@ -24,6 +26,10 @@ class Rocket{
         }
       }
     }
+  }
+
+  calcGunDistance(){
+    this.distFromGun = dist(this.pos.x, this.pos.y, width/2, height)
   }
 
   show(){

@@ -16,8 +16,19 @@ class Gun{
         return -this.rotationSpeed;
       } else if(keyIsDown(RIGHT_ARROW)){
         return this.rotationSpeed;
-      } else {return 0}
+      } else if(keyIsDown(71)){
+        this.botControl()
+      }
+      else {return 0}
 
+    }
+
+    botControl(){
+      $.ajax({
+        url: "model.py",
+      }).done(function(data){
+        console.log(data)
+      })
     }
 
     show(){
