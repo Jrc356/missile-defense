@@ -14,20 +14,24 @@ class Gun{
     control(){
       if(keyIsDown(LEFT_ARROW)) {
         return -this.rotationSpeed;
-      } else if(keyIsDown(RIGHT_ARROW)){
-        return this.rotationSpeed;
-      } else if(keyIsDown(71)){
-        this.botControl()
-      }
+        } else if(keyIsDown(RIGHT_ARROW)){
+          return this.rotationSpeed;
+        }
+
       else {return 0}
 
     }
 
     botControl(){
+      console.log("Calling...");
       $.ajax({
-        url: "model.py",
-      }).done(function(data){
-        console.log(data)
+        url: "http://127.0.0.1:5000/model",
+        data: "data=1+5+6+3+7",
+        dataType: 'jsonp',
+        success: function(data){
+          console.log(data);
+        },
+        error: function(data){console.log(data)}
       })
     }
 

@@ -9,7 +9,7 @@ print("Model Created...")
 app = Flask(__name__)
 
 
-@app.route("/")
+@app.route("/model", methods=['GET', 'POST'])
 def index():
     params = request.args.get("data")
     params = params.split('+')
@@ -17,5 +17,6 @@ def index():
     print(params)
     return str(params)
 
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

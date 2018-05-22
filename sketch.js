@@ -95,12 +95,6 @@ function draw(){
 
   closestRocket = calcClosestRocket();
 
-
-  //// Debug
-  if(frameCount%100 == 0){
-    console.log(closestRocket);
-  }
-  
   //display score in top left corner
   textSize(32);
   fill(0);
@@ -153,5 +147,9 @@ function updateAndDraw(a){
 function keyPressed() {
   if (keyCode === 32){
     bullets.push(new Bullet(width/2, height-1));
+  }
+
+  if (keyCode === 70){
+    gun.botControl();
   }
 }
