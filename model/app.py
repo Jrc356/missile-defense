@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from model import Model
 
 print("Creating Model.", end="")
@@ -7,15 +7,18 @@ print(".")
 model = Model(5)
 print("Model Created...")
 app = Flask(__name__)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 @app.route("/model", methods=['GET', 'POST'])
 def index():
     params = request.args.get("data")
-    params = params.split('+')
-    print(type(params))
     print(params)
-    return str(params)
+    params = params.split(' ')
+    print(params)
+    response = jsonify(result=str(params))
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 if __name__ == '__main__':

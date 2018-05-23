@@ -27,11 +27,11 @@ class Gun{
       $.ajax({
         url: "http://127.0.0.1:5000/model",
         data: "data=1+5+6+3+7",
-        dataType: 'jsonp',
+        dataType: 'json',
         success: function(data){
           console.log(data);
         },
-        error: function(data){console.log(data)}
+        //error: function(data){console.log(data[0])}
       })
     }
 
