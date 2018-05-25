@@ -7,8 +7,16 @@ class Gun{
     }
 
     update(){
-      this.angle += this.control();
-      this.angle = constrain(this.angle, -PI/2, PI/2);
+      if (frameCount <= 10){
+      } else {
+        this.angle += this.botControl([closestRocket.pos.x,
+                                        closestRocket.pos.y,
+                                        closestRocket.vel.x,
+                                        closestRocket.vel.y,
+                                        this.angle]);
+
+        this.angle = constrain(this.angle, -PI/2, PI/2);
+      }
     }
 
     control(){
@@ -22,17 +30,32 @@ class Gun{
 
     }
 
-    botControl(){
+    botControl(params){
+      console.log(params);
+      let moves;
       console.log("Calling...");
       $.ajax({
         url: "http://127.0.0.1:5000/model",
-        data: "data=1+5+6+3+7",
+        data: "data=" + params.join('+'),
         dataType: 'json',
+        async: false,
         success: function(data){
           console.log(data);
+          moves = data['result'];
         },
         //error: function(data){console.log(data[0])}
       })
+
+      if(moves[1] > .5){
+        bullets.push(new Bullet(width/2, height-1));
+      }
+
+
+      if (moves[0] > .5){
+        return this.rotationSpeed
+      } else {
+        return -this.rotationSpeed
+      }
     }
 
     show(){

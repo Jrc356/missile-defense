@@ -150,6 +150,10 @@ function keyPressed() {
   }
 
   if (keyCode === 70){
-    gun.botControl();
+    gun.botControl([closestRocket.pos.x, 
+                    closestRocket.pos.y,
+                    closestRocket.vel.x,
+                    closestRocket.vel.y,
+                    gun.angle]);
   }
 }
