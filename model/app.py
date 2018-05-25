@@ -4,7 +4,7 @@ from model import Model
 print("Creating Model.", end="")
 print(".", end="")
 print(".")
-model = Model(5)
+model = Model((5, 1))
 print("Model Created...")
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'

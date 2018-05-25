@@ -5,25 +5,26 @@ from random import choice, random
 
 
 class Model:
-    def __init__(self, input_dim_size):
-        self.model = self.createModel(input_dim_size)
+    def __init__(self, input_shape):
+        self.model = self.createModel(input_shape)
         self.model.compile(optimizer='rmsprop',
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
-        
+                           loss='categorical_crossentropy',
+                           metrics=['accuracy'])
 
     # create the model
-    def createModel(self, input_dim_size):
-        model = Sequential()
-        model.add(Dense(1, input_dim=input_dim_size, name="Input"))
-        model.add(Activation('relu'))
-        model.add(Dropout(.2))
-        model.add(Dense(10, name="Hidden"))
-        model.add(Activation('relu'))
-        model.add(Dropout(.2))
-        model.add(Dense(2, name="Output"))
-        model.add(Activation('softmax'))
-        return model
+
+
+def createModel(input_shape):
+    model = Sequential()
+    model.add(Dense(1, input_shape=input_shape, name="Input"))
+    model.add(Activation('relu'))
+    model.add(Dropout(.2))
+    model.add(Dense(10, name="Hidden"))
+    model.add(Activation('relu'))
+    model.add(Dropout(.2))
+    model.add(Dense(2, name="Output"))
+    model.add(Activation('softmax'))
+    return model
 
     # mutate Model
     def mutate(self, rate):
