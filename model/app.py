@@ -13,13 +13,20 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 @app.route("/model", methods=['GET', 'POST'])
 def index():
     params = request.args.get("data")
-    params = params.split(' ')
 
-    pred = model.predict(params)
+    if(params == "mutate"):
+        model.mutate(1)
 
-    response = jsonify(result=str(pred))
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+        response = jsonify(result=params)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    else:
+        params = params.split(' ')
+        pred = model.predict(params)
+
+        response = jsonify(result=pred)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
 
 if __name__ == '__main__':

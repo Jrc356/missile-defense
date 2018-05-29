@@ -31,31 +31,36 @@ class Gun{
     }
 
     botControl(params){
-      console.log(params);
       let moves;
-      console.log("Calling...");
       $.ajax({
         url: "http://127.0.0.1:5000/model",
         data: "data=" + params.join('+'),
         dataType: 'json',
         async: false,
         success: function(data){
-          console.log(data);
-          moves = data['result'];
-        },
-        //error: function(data){console.log(data[0])}
-      })
+          moves = data['result'][0];
 
-      if(moves[1] > .5){
+        },
+      });
+
+      //console.log(moves);
+
+      if(moves[1] >= .5){
         bullets.push(new Bullet(width/2, height-1));
       }
 
 
-      if (moves[0] > .5){
-        return this.rotationSpeed
+      if (moves[0] >= .5){
+        return this.rotationSpeed;
       } else {
-        return -this.rotationSpeed
+        return -this.rotationSpeed;
       }
+
+      // if (moves[0] >= .67){
+      //   return this.rotationSpeed;
+      // } else if(moves[0] < .67 && moves[1] >= .33) {
+      //   return -this.rotationSpeed;
+      // } else{return 0}
     }
 
     show(){

@@ -1,30 +1,30 @@
+//containers
 var gun = new Gun;
 var bullets = [];
 var buildings = [];
 var rockets = [];
+
+// game settings
 var numRockets = 5;
 var maxRocketsOnScreen = 5;
 var numBuildings = 4;
 var rocketMaxSpeed = 5;
 var buildingHealth = 4;
+var isGameOver = false;
+var numBullets = 100;
+
+//score settings
 var score = 0;
 var increment = 10;
-var isGameOver = false;
+
+//Genetic algo settings
 var closestRocket;
+var generation = 0;
 
 function setup(){
   createCanvas(800, 800);
   frameRate(60);
-
-  //Create buildings
-  for(var i = 0; i < numBuildings; i++){
-    buildings.push(new Building(100+width/numBuildings * i));
-  }
-
-  //Create initial rockets
-  for(var i = 0; i < numRockets; i++){
-    rockets.push(new Rocket());
-  }
+  resetSketch();
 }
 
 //Run every frame
@@ -33,6 +33,10 @@ function draw(){
   if(frameCount%1000 == 0){
     numRockets += 1;
     constrain(numRockets, 0, maxRocketsOnScreen) //restrict number of rockets
+  }
+
+  if(bullets.length > numBullets){
+    bullets.splice(0, 1);
   }
 
 
@@ -101,6 +105,7 @@ function draw(){
   text(score, 10, 30);
 
   //if game is over, display game over text
+  //and mutate NN
   if(isGameOver){
     push();
     translate(width/2, height/2);
@@ -109,11 +114,46 @@ function draw(){
     fill(0);
     text("Game Over", 0, 0);
     pop();
-    noLoop();
+    //noLoop();
+    mutateNN();
+    resetSketch();
   }
 }
 
 
+function resetSketch(){
+  buildings = [];
+  rockets = [];
+  isGameOver = false;
+  gun = new Gun;
+  score = 0;
+
+
+  //Create buildings
+
+  for(var i = 0; i < numBuildings; i++){
+    buildings.push(new Building(100+width/numBuildings * i));
+  }
+
+  //Create initial rockets
+  for(var i=j = 0; j < numRockets; j++){
+    rockets.push(new Rocket());
+  }
+
+}
+
+function mutateNN(){
+  $.ajax({
+    url: "http://127.0.0.1:5000/model",
+    data: "data=mutate",
+    dataType: 'json',
+    async: false,
+    success: function(){
+      generation += 1;
+      console.log("Current Generation: " + generation);
+    },
+  });
+}
 
 // if object in array a goes outside the border of the window + a margin (account for rocket start above the screen), remove it from the array
 function isOffscreen(a){
@@ -150,7 +190,7 @@ function keyPressed() {
   }
 
   if (keyCode === 70){
-    gun.botControl([closestRocket.pos.x, 
+    gun.botControl([closestRocket.pos.x,
                     closestRocket.pos.y,
                     closestRocket.vel.x,
                     closestRocket.vel.y,
