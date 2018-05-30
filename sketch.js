@@ -6,12 +6,15 @@ var rockets = [];
 
 // game settings
 var numRockets = 5;
-var maxRocketsOnScreen = 5;
 var numBuildings = 4;
 var rocketMaxSpeed = 5;
 var buildingHealth = 4;
 var isGameOver = false;
 var numBullets = 100;
+var slider;
+var sliderVal;
+var cycles;
+
 
 //score settings
 var score = 0;
@@ -25,99 +28,106 @@ function setup(){
   createCanvas(800, 800);
   frameRate(60);
   resetSketch();
+  slider = createSlider(1, 100, 1);
+  slider.position(1000, 50);
+  sliderVal = createP(slider.value());
 }
 
 //Run every frame
 function draw(){
-  //Add new rocket every 1000 frames
-  if(frameCount%1000 == 0){
-    numRockets += 1;
-    constrain(numRockets, 0, maxRocketsOnScreen) //restrict number of rockets
-  }
-
-  if(bullets.length > numBullets){
-    bullets.splice(0, 1);
-  }
+  sliderVal.html(slider.value());
 
 
-  //Game Over scenario - all buildings destroyed
-  if(buildings.length == 0){
-    isGameOver = true;
-  }
+  for(let n = 0; n < slider.value(); n++){
 
-  //Game Over scenario - gun is hit
-  for(var i = 0; i < rockets.length; i++){
-    d = dist(rockets[i].pos.x, rockets[i].pos.y, width/2, height)
-    if(d <= rockets[i].width){
-      gun.height = 0;
+    if(bullets.length > numBullets){
+      bullets.splice(0, 1);
+    }
+
+
+    //Game Over scenario - all buildings destroyed
+    if(buildings.length == 0){
       isGameOver = true;
     }
-  }
 
-  //check if bullets or rockets go offscreen and remove them if they have
-  isOffscreen(bullets);
-  isOffscreen(rockets);
-
-  //check bullet collision with rockets
-  if(bullets[0] != null){
-    for(var i = bullets.length-1; i > 0; i--){
-      bullets[i].hasCollided(rockets);
-      if(bullets[i].hasHit){
-        bullets.splice(bullets.indexOf(bullets[i]), 1);
-        score += increment;
+    //Game Over scenario - gun is hit
+    for(var i = 0; i < rockets.length; i++){
+      d = dist(rockets[i].pos.x, rockets[i].pos.y, width/2, height)
+      if(d <= rockets[i].width){
+        gun.height = 0;
+        isGameOver = true;
       }
     }
-  }
 
-  //if a buildings health is 0 or below, remove it
-  for (var i = 0; i < buildings.length; i++) {
-    if (buildings[i].health <= 0) {
-      buildings.splice(buildings.indexOf(buildings[i]), 1);
+    //check if bullets or rockets go offscreen and remove them if they have
+    isOffscreen(bullets);
+    isOffscreen(rockets);
+
+    //check bullet collision with rockets
+    if(bullets[0] != null){
+      for(var i = bullets.length-1; i > 0; i--){
+        bullets[i].hasCollided(rockets);
+        if(bullets[i].hasHit){
+          bullets.splice(bullets.indexOf(bullets[i]), 1);
+          score += increment;
+        }
+      }
+    }
+
+    //if a buildings health is 0 or below, remove it
+    for (var i = 0; i < buildings.length; i++) {
+      if (buildings[i].health <= 0) {
+        buildings.splice(buildings.indexOf(buildings[i]), 1);
+      }
+    }
+
+    //if a rocket has hit a building, remove it
+    for(var i = 0; i < rockets.length; i++){
+      if(rockets[i].isHit){
+        rockets.splice(rockets.indexOf(rockets[i]), 1);
+      }
+    }
+
+    //generate new rockets if some amount of rockets went off screen or hit something
+    while(rockets.length != numRockets){
+      rockets.push(new Rocket());
+    }
+
+    gun.update();
+    updateArr(rockets);
+    updateArr(bullets);
+    updateArr(buildings);
+
+
+    closestRocket = calcClosestRocket();
+    //if game is over, display game over text
+    //and mutate NN
+    if(isGameOver){
+      push();
+      translate(width/2, height/2);
+      textSize(72);
+      textAlign(CENTER);
+      fill(0);
+      text("Game Over", 0, 0);
+      pop();
+      //noLoop();
+      mutateNN();
+      resetSketch();
     }
   }
 
-  //if a rocket has hit a building, remove it
-  for(var i = 0; i < rockets.length; i++){
-    if(rockets[i].isHit){
-      rockets.splice(rockets.indexOf(rockets[i]), 1);
-    }
-  }
-
-  //generate new rockets if some amount of rockets went off screen or hit something
-  while(rockets.length != numRockets){
-    rockets.push(new Rocket());
-  }
-
-  gun.update();
-
-  //display
   background(200);
   gun.show();
-  updateAndDraw(bullets);
-  updateAndDraw(buildings);
-  updateAndDraw(rockets);
-
-  closestRocket = calcClosestRocket();
+  showArr(rockets);
+  showArr(bullets);
+  showArr(buildings);
 
   //display score in top left corner
   textSize(32);
   fill(0);
   text(score, 10, 30);
 
-  //if game is over, display game over text
-  //and mutate NN
-  if(isGameOver){
-    push();
-    translate(width/2, height/2);
-    textSize(72);
-    textAlign(CENTER);
-    fill(0);
-    text("Game Over", 0, 0);
-    pop();
-    //noLoop();
-    mutateNN();
-    resetSketch();
-  }
+
 }
 
 
@@ -176,9 +186,14 @@ function calcClosestRocket(){
 }
 
 //run all update and show ojects within an array a
-function updateAndDraw(a){
+function updateArr(a){
   for(var i = 0; i < a.length; i++){
     a[i].update();
+  }
+}
+
+function showArr(a){
+  for(var i = 0; i < a.length; i++){
     a[i].show();
   }
 }

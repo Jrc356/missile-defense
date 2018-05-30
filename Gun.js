@@ -15,7 +15,7 @@ class Gun{
                                         closestRocket.vel.y,
                                         this.angle]);
 
-        this.angle = constrain(this.angle, -PI/2, PI/2);
+        this.angle = constrain(this.angle, -1, 1);
       }
     }
 
@@ -38,8 +38,7 @@ class Gun{
         dataType: 'json',
         async: false,
         success: function(data){
-          moves = data['result'][0];
-
+          moves = data['result'][0][0];
         },
       });
 
