@@ -17,7 +17,7 @@ class Model:
     # create the model
     def createModel(self, input_shape):
         model = Sequential()
-        model.add(Dense(1, input_shape=input_shape, name="Input"))
+        model.add(Dense(5, input_shape=input_shape, name="Input"))
         model.add(Activation('relu'))
         model.add(Dropout(.2))
         model.add(Dense(10, name="Hidden1"))
@@ -37,18 +37,24 @@ class Model:
                   self.model.layers[6],
                   self.model.layers[9]]
 
-        chance = random()
+        chance1 = random()
+        chance2 = random()
 
         for layer in layers:
-            if chance <= rate:
+            if chance1 <= rate:
                 weights = layer.get_weights()
-                chosen_weight = choice(weights)
-                print("chosen_weight: ", chosen_weight)
-                idx = weights.index(chosen_weight)
+                ws = weights[0]
+                bs = weights[1]
 
-                new_weight = random()
-                weights[idx] = new_weight
-                layer.set_weights(weights)
+                for i in range(len(ws)):
+                    if chance2 <= rate:
+                        w_shape = ws.shape
+                        new_ws = np.random.random(w_shape)
+
+                        ws = new_ws
+
+                with self.graph.as_default():
+                    layer.set_weights([ws, bs])
 
     def predict(self, params):
         params = self._reshape(np.array(params))
@@ -59,4 +65,4 @@ class Model:
         return pred
 
     def _reshape(self, a):
-        return a.reshape(1, 5)
+        return a.reshape(1, 1, 5)

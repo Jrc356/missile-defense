@@ -4,7 +4,7 @@ from model import Model
 print("Creating Model.", end="")
 print(".", end="")
 print(".")
-model = Model((5,))
+model = Model((1, 5))
 print("Model Created...")
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -15,7 +15,7 @@ def index():
     params = request.args.get("data")
 
     if(params == "mutate"):
-        model.mutate(1)
+        model.mutate(.5)
 
         response = jsonify(result=params)
         response.headers.add('Access-Control-Allow-Origin', '*')
