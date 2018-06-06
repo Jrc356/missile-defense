@@ -1,9 +1,10 @@
 class Bullet{
-  constructor(posx, posy){
+  constructor(posx, posy, game){
+    this.game = game;
     this.pos = createVector(posx, posy);
     this.vel = createVector();
-    this.vel.x = sin(gun.angle);
-    this.vel.y = -cos(gun.angle);
+    this.vel.x = sin(this.game.gun.angle);
+    this.vel.y = -cos(this.game.gun.angle);
     this.vel.mult(5);
     this.hasHit = false;
   }

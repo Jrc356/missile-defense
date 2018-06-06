@@ -1,5 +1,6 @@
 class Gun{
-    constructor(){
+    constructor(game){
+      this.game = game
       this.angle = 0;
       this.rotationSpeed = 0.05;
       this.height = 30;
@@ -9,10 +10,10 @@ class Gun{
     update(){
       if (frameCount <= 10){
       } else {
-        this.angle += this.botControl([closestRocket.pos.x,
-                                        closestRocket.pos.y,
-                                        closestRocket.vel.x,
-                                        closestRocket.vel.y,
+        this.angle += this.botControl([this.game.closestRocket.pos.x,
+                                        this.game.closestRocket.pos.y,
+                                        this.game.closestRocket.vel.x,
+                                        this.game.closestRocket.vel.y,
                                         this.angle]);
 
         this.angle = constrain(this.angle, -1, 1);
@@ -33,8 +34,8 @@ class Gun{
     botControl(params){
       let moves;
       $.ajax({
-        url: "http://127.0.0.1:5000/model",
-        data: "data=" + params.join('+'),
+        url: "http://127.0.0.1:5000/model/predict",
+        data: "data=" + params.join('+') + "&model=" + this.game._id,
         dataType: 'json',
         async: false,
         success: function(data){
@@ -45,7 +46,7 @@ class Gun{
       //console.log(moves);
 
       if(moves[1] >= .5){
-        bullets.push(new Bullet(width/2, height-1));
+        this.game.bullets.push(new Bullet(width/2, height-1, this.game));
       }
 
 

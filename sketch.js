@@ -1,214 +1,105 @@
-//containers
-var gun = new Gun;
-var bullets = [];
-var buildings = [];
-var rockets = [];
-
-// game settings
-var numRockets = 5;
-var numBuildings = 4;
-var rocketMaxSpeed = 5;
-var buildingHealth = 4;
-var isGameOver = false;
-var numBullets = 100;
+var games;
+var finishedGames = [];
+var numGames = 5;
 var slider;
 var sliderVal;
-var cycles;
+var gameP;
 
-
-//score settings
-var score = 0;
-var increment = 10;
-
-//Genetic algo settings
-var closestRocket;
-var generation = 0;
 
 function setup(){
-  createCanvas(800, 800);
-  frameRate(60);
-  resetSketch();
   slider = createSlider(1, 100, 1);
   slider.position(1000, 50);
   sliderVal = createP(slider.value());
-}
+  gameP = createP(0);
 
-//Run every frame
-function draw(){
-  sliderVal.html(slider.value());
-
-
-  for(let n = 0; n < slider.value(); n++){
-
-    if(bullets.length > numBullets){
-      bullets.splice(0, 1);
-    }
-
-
-    //Game Over scenario - all buildings destroyed
-    if(buildings.length == 0){
-      isGameOver = true;
-    }
-
-    //Game Over scenario - gun is hit
-    for(var i = 0; i < rockets.length; i++){
-      d = dist(rockets[i].pos.x, rockets[i].pos.y, width/2, height)
-      if(d <= rockets[i].width){
-        gun.height = 0;
-        isGameOver = true;
-      }
-    }
-
-    //check if bullets or rockets go offscreen and remove them if they have
-    isOffscreen(bullets);
-    isOffscreen(rockets);
-
-    //check bullet collision with rockets
-    if(bullets[0] != null){
-      for(var i = bullets.length-1; i > 0; i--){
-        bullets[i].hasCollided(rockets);
-        if(bullets[i].hasHit){
-          bullets.splice(bullets.indexOf(bullets[i]), 1);
-          score += increment;
-        }
-      }
-    }
-
-    //if a buildings health is 0 or below, remove it
-    for (var i = 0; i < buildings.length; i++) {
-      if (buildings[i].health <= 0) {
-        buildings.splice(buildings.indexOf(buildings[i]), 1);
-      }
-    }
-
-    //if a rocket has hit a building, remove it
-    for(var i = 0; i < rockets.length; i++){
-      if(rockets[i].isHit){
-        rockets.splice(rockets.indexOf(rockets[i]), 1);
-      }
-    }
-
-    //generate new rockets if some amount of rockets went off screen or hit something
-    while(rockets.length != numRockets){
-      rockets.push(new Rocket());
-    }
-
-    gun.update();
-    updateArr(rockets);
-    updateArr(bullets);
-    updateArr(buildings);
-
-
-    closestRocket = calcClosestRocket();
-    //if game is over, display game over text
-    //and mutate NN
-    if(isGameOver){
-      push();
-      translate(width/2, height/2);
-      textSize(72);
-      textAlign(CENTER);
-      fill(0);
-      text("Game Over", 0, 0);
-      pop();
-      //noLoop();
-      mutateNN();
-      resetSketch();
-    }
-  }
-
-  background(200);
-  gun.show();
-  showArr(rockets);
-  showArr(bullets);
-  showArr(buildings);
-
-  //display score in top left corner
-  textSize(32);
-  fill(0);
-  text(score, 10, 30);
-
-
-}
-
-
-function resetSketch(){
-  buildings = [];
-  rockets = [];
-  isGameOver = false;
-  gun = new Gun;
-  score = 0;
-
-
-  //Create buildings
-
-  for(var i = 0; i < numBuildings; i++){
-    buildings.push(new Building(100+width/numBuildings * i));
-  }
-
-  //Create initial rockets
-  for(var i=j = 0; j < numRockets; j++){
-    rockets.push(new Rocket());
-  }
-
-}
-
-function mutateNN(){
   $.ajax({
     url: "http://127.0.0.1:5000/model",
-    data: "data=mutate",
+    data: "num_models=" + numGames,
     dataType: 'json',
     async: false,
     success: function(){
-      generation += 1;
-      console.log("Current Generation: " + generation);
+      console.log("All Models Created.")
     },
   });
+  resetGames();
+
 }
 
-// if object in array a goes outside the border of the window + a margin (account for rocket start above the screen), remove it from the array
-function isOffscreen(a){
-  var margin = 100;
-  for(var i = a.length - 1; i >= 0; i--){
-    if(a[i].pos.x <= 0 - margin || a[i].pos.x >= width + margin || a[i].pos.y <= 0 - margin|| a[i].pos.y >= height + margin){
-      a.splice(a.indexOf(a[i]), 1);
+function draw(){
+  sliderVal.html(slider.value());
+
+  //Check for best current game
+  let bestGameScore = 0;
+  let bestGameIdx = 0;
+
+  for(let i = 0; i < games.length; i++){
+    if(games[i].score > bestGameScore){
+        bestGameIdx = i;
+        bestGameScore = games[i].score;
     }
   }
+
+  //if best game is not displayed, display it
+  if(games.length > 0){
+    for(let i = 0; i < games.length; i++){
+      if(games[i] != games[bestGameIdx]){
+        games[i].displayed = false;
+      } else {
+        games[i].displayed = true;
+        gameP.html("Game Shown: " + games[bestGameIdx]._id);
+      }
+    }
+
+    //draw game
+    let finIdxs = [];
+    for(let i = 0; i < games.length; i++){
+      if(!games[i].isGameOver){
+        games[i].draw(slider.value());
+      }else{
+        console.log("Game " + games[i]._id + " is over.")
+        finIdxs.push(i);
+      }
+    }
+    for(let i = 0; i < finIdxs.length; i++){
+      finishedGames.push(games[finIdxs[i]]);
+      games.splice(finIdxs[i], 1);
+    }
+  } else {
+    evolve();
+    resetGames();
+  }
 }
 
-function calcClosestRocket(){
-  let best = rockets[0];
-  for(let i = 0; i < rockets.length; i++){
-    if(rockets[i].distFromGun < best.distFromGun){
-      best = rockets[i];
+function resetGames(){
+  games = [];
+
+  for(var i = 0; i < numGames; i++){
+    games.push(new Game(i));
+  }
+
+  for(let i = 0; i < games.length; i++){
+    games[i].setup();
+  }
+}
+
+function evolve(){
+  $.ajax({
+    url: "http://127.0.0.1:5000/model/evolve",
+    dataType: 'json',
+    async: false,
+    success: function(){
+      for(let i = 0; i < finishedGames.length; i++){
+        games.push(finishedGames[i]);
+      }
+      finishedGames = [];
+    }
+  })
+}
+
+function keyPressed(){
+    if (keyCode === 32){
+      for(let i = 0; i < games.length; i++){
+        games[i].isGameOver = true;
+      }
     }
   }
-  return best
-}
-
-//run all update and show ojects within an array a
-function updateArr(a){
-  for(var i = 0; i < a.length; i++){
-    a[i].update();
-  }
-}
-
-function showArr(a){
-  for(var i = 0; i < a.length; i++){
-    a[i].show();
-  }
-}
-
-//listen for spacebar
-function keyPressed() {
-  if (keyCode === 32){
-    bullets.push(new Bullet(width/2, height-1));
-  }
-
-  if (keyCode === 70){
-    gun.botControl([closestRocket.pos.x,
-                    closestRocket.pos.y,
-                    closestRocket.vel.x,
-                    closestRocket.vel.y,
-                    gun.angle]);
-  }
-}

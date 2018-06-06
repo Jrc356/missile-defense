@@ -1,9 +1,10 @@
 class Rocket{
-  constructor(){
+  constructor(game){
+    this.game = game;
     this.width = 50;
     this.isHit = false;
     this.vel = p5.Vector.random2D();
-    this.vel.y = Math.floor(random(1, rocketMaxSpeed));
+    this.vel.y = Math.floor(random(1, this.game.rocketMaxSpeed));
     this.pos = createVector(random(0,width), random(-50, 0));
     this.distFromGun = 0
 
@@ -16,11 +17,11 @@ class Rocket{
   }
 
   hasCollided(){
-    if(buildings[0] != null){
-      for(var i = buildings.length-1; i >= 0; i--){
-        var d = dist(this.pos.x, this.pos.y, buildings[i].pos, height-buildings[i].height);
+    if(this.game.buildings[0] != null){
+      for(var i = this.game.buildings.length-1; i >= 0; i--){
+        var d = dist(this.pos.x, this.pos.y, this.game.buildings[i].pos, height-this.game.buildings[i].height);
         if(d <= this.width-1){
-          buildings[i].health -= 1;
+          this.game.buildings[i].health -= 1;
           this.isHit = true;
           break;
         }
