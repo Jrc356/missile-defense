@@ -66,3 +66,33 @@ class Model:
 
     def _reshape(self, a):
         return a.reshape(1, 1, 5)
+
+    def crossOver(self, b):
+        layerIdxs = [0, 3, 6, 9]
+        cLayers = []
+        for idx in layerIdxs:
+            layerA = self.model.layers[idx]
+            layerB = b.model.layers[idx]
+
+            aWeights = layerA.get_weights()
+            aWs = aWeights[0]
+            aBs = aWeights[1]
+            bWeights = layerB.get_weights()
+            bWs = bWeights[0]
+            bBs = bWeights[1]
+
+            for i in range(len(aWs)):
+                nA = aWs[i].tolist()
+                nB = bWs[i].tolist()
+                mid = round(len(nA) / 2)
+                nA = nA[:mid] + nB[mid:]
+                aWs[i] = nA
+
+            mid = round(len(aBs) / 2)
+            newBA = np.array(aBs.tolist()[:mid] + bBs.tolist()[mid:])
+            aBs = newBA
+
+            with self.graph.as_default():
+                self.model.set_weights([aWs, aBs])
+
+            return self.model
