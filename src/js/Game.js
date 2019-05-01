@@ -6,12 +6,12 @@ class Game{
     this.bullets = [];
     this.gun = new Gun(this);
     this.buildings = [];
-    this.rockets = [];
+    this.meteors = [];
 
     // game settings
-    this.numRockets = 5;
+    this.numMeteors = 5;
     this.numBuildings = 4;
-    this.rocketMaxSpeed = 5;
+    this.meteorMaxSpeed = 5;
     this.buildingHealth = 4;
     this.numBullets = 100;
 
@@ -37,14 +37,14 @@ class Game{
         this.bullets.splice(0, 1);
       }
 
-      //check if bullets or rockets go offscreen and remove them if they have
+      //check if bullets or meteors go offscreen and remove them if they have
       this.isOffscreen(this.bullets);
-      this.isOffscreen(this.rockets);
+      this.isOffscreen(this.meteors);
 
-      //check bullet collision with rockets
+      //check bullet collision with meteors
       if(this.bullets[0] != null){
         for(var i = this.bullets.length-1; i > 0; i--){
-          this.bullets[i].hasCollided(this.rockets);
+          this.bullets[i].hasCollided(this.meteors);
           if(this.bullets[i].hasHit){
             this.bullets.splice(this.bullets.indexOf(this.bullets[i]), 1);
             this.score += this.increment;
@@ -59,16 +59,16 @@ class Game{
         }
       }
 
-      //if a rocket has hit a building, remove it
-      for(var i = 0; i < this.rockets.length; i++){
-        if(this.rockets[i].isHit){
-          this.rockets.splice(this.rockets.indexOf(this.rockets[i]), 1);
+      //if a meteor has hit a building, remove it
+      for(var i = 0; i < this.meteors.length; i++){
+        if(this.meteors[i].isHit){
+          this.meteors.splice(this.meteors.indexOf(this.meteors[i]), 1);
         }
       }
 
-      //generate new rockets if some amount of rockets went off screen or hit something
-      while(this.rockets.length != this.numRockets){
-        this.rockets.push(new Rocket(this));
+      //generate new meteors if some amount of meteors went off screen or hit something
+      while(this.meteors.length != this.numMeteors){
+        this.meteors.push(new Meteor(this));
       }
 
       this.update()
@@ -83,7 +83,7 @@ class Game{
 
   update(){
     this.gun.update();
-    this.updateArr(this.rockets);
+    this.updateArr(this.meteors);
     this.updateArr(this.bullets);
     this.updateArr(this.buildings);
   }
@@ -92,7 +92,7 @@ class Game{
     if(this.displayed){
       background(200);
       this.gun.show();
-      this.showArr(this.rockets);
+      this.showArr(this.meteors);
       this.showArr(this.bullets);
       this.showArr(this.buildings);
 
@@ -123,9 +123,9 @@ class Game{
       }
 
       //Game Over scenario - gun is hit
-      for(var i = 0; i < this.rockets.length; i++){
-        let d = dist(this.rockets[i].pos.x, this.rockets[i].pos.y, width/2, height) + this.COLLISION_BUFFER;
-        if(d <= this.rockets[i].width){
+      for(var i = 0; i < this.meteors.length; i++){
+        let d = dist(this.meteors[i].pos.x, this.meteors[i].pos.y, width/2, height) + this.COLLISION_BUFFER;
+        if(d <= this.meteors[i].width){
           console.log("gun destroyed")
           this.gun.height = 0;
           return true
@@ -137,7 +137,7 @@ class Game{
 
   resetSketch(){
     this.buildings = [];
-    this.rockets = [];
+    this.meteors = [];
     this.gun = new Gun(this);
     this.score = 0;
 
@@ -146,14 +146,14 @@ class Game{
       this.buildings.push(new Building(100+width/this.numBuildings * i, this));
     }
 
-    //Create initial rockets
-    for(var j = 0; j < this.numRockets; j++){
-      this.rockets.push(new Rocket(this));
+    //Create initial meteors
+    for(var j = 0; j < this.numMeteors; j++){
+      this.meteors.push(new Meteor(this));
     }
 
   }
 
-  // if object in array a goes outside the border of the window + a margin (account for rocket start above the screen), remove it from the array
+  // if object in array a goes outside the border of the window + a margin (account for meteor start above the screen), remove it from the array
   isOffscreen(a){
     var margin = 100;
     for(var i = a.length - 1; i >= 0; i--){

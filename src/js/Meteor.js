@@ -1,10 +1,10 @@
-class Rocket{
+class Meteor{
   constructor(game){
     this.game = game;
     this.width = 50;
     this.isHit = false;
     this.vel = p5.Vector.random2D();
-    this.vel.y = Math.floor(random(1, this.game.rocketMaxSpeed));
+    this.vel.y = Math.floor(random(1, this.game.meteorMaxSpeed));
     this.pos = createVector(random(0,width), random(-50, 0));
   }
 
