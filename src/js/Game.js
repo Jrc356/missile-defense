@@ -2,8 +2,8 @@ class Game{
   constructor(idx){
     //containers
     this._id = idx;
-    this.gun = new Gun(this);
     this.bullets = [];
+    this.gun = new Gun(this);
     this.buildings = [];
     this.rockets = [];
 
@@ -14,17 +14,10 @@ class Game{
     this.buildingHealth = 4;
     this.isGameOver = false;
     this.numBullets = 100;
-    this.slider;
-    this.sliderVal;
-    this.cycles;
 
     //score settings
     this.score = 0;
     this.increment = 10;
-
-    //Genetic algo settings
-    this.closestRocket;
-    this.generation = 0;
 
     this.displayed = false;
     this.canvas;
@@ -36,86 +29,52 @@ class Game{
     this.resetSketch();
   }
 
-  //Run every frame
-  draw(cycles){
+  draw(){
     if(!this.isGameOver){
-      for(let n = 0; n < cycles; n++){
+      this.gameOverScenarios()
+      
+      if(this.bullets.length > this.numBullets){
+        this.bullets.splice(0, 1);
+      }
 
-        if(this.bullets.length > this.numBullets){
-          this.bullets.splice(0, 1);
-        }
+      //check if bullets or rockets go offscreen and remove them if they have
+      this.isOffscreen(this.bullets);
+      this.isOffscreen(this.rockets);
 
-
-        //Game Over scenario - all buildings destroyed
-        if(this.buildings.length == 0){
-          this.isGameOver = true;
-        }
-
-        //Game Over scenario - gun is hit
-        for(var i = 0; i < this.rockets.length; i++){
-          let d = dist(this.rockets[i].pos.x, this.rockets[i].pos.y, width/2, height);
-          if(d <= this.rockets[i].width){
-            this.gun.height = 0;
-            this.isGameOver = true;
+      //check bullet collision with rockets
+      if(this.bullets[0] != null){
+        for(var i = this.bullets.length-1; i > 0; i--){
+          this.bullets[i].hasCollided(this.rockets);
+          if(this.bullets[i].hasHit){
+            this.bullets.splice(this.bullets.indexOf(this.bullets[i]), 1);
+            this.score += this.increment;
           }
-        }
-
-        //check if bullets or rockets go offscreen and remove them if they have
-        this.isOffscreen(this.bullets);
-        this.isOffscreen(this.rockets);
-
-        //check bullet collision with rockets
-        if(this.bullets[0] != null){
-          for(var i = this.bullets.length-1; i > 0; i--){
-            this.bullets[i].hasCollided(this.rockets);
-            if(this.bullets[i].hasHit){
-              this.bullets.splice(this.bullets.indexOf(this.bullets[i]), 1);
-              this.score += this.increment;
-            }
-          }
-        }
-
-        //if a buildings health is 0 or below, remove it
-        for (var i = 0; i < this.buildings.length; i++) {
-          if (this.buildings[i].health <= 0) {
-            this.buildings.splice(this.buildings.indexOf(this.buildings[i]), 1);
-          }
-        }
-
-        //if a rocket has hit a building, remove it
-        for(var i = 0; i < this.rockets.length; i++){
-          if(this.rockets[i].isHit){
-            this.rockets.splice(this.rockets.indexOf(this.rockets[i]), 1);
-          }
-        }
-
-        //generate new rockets if some amount of rockets went off screen or hit something
-        while(this.rockets.length != this.numRockets){
-          this.rockets.push(new Rocket(this));
-        }
-
-        this.gun.update();
-        this.updateArr(this.rockets);
-        this.updateArr(this.bullets);
-        this.updateArr(this.buildings);
-
-
-        this.closestRocket = this.calcClosestRocket();
-        //if game is over, display game over text
-        //and mutate NN
-        if(this.isGameOver){
-          push();
-          translate(width/2, height/2);
-          textSize(72);
-          textAlign(CENTER);
-          fill(0);
-          text("Game Over", 0, 0);
-          pop();
-          //noLoop();
-          //this.mutateNN();
-          //this.resetSketch();
         }
       }
+
+      //if a buildings health is 0 or below, remove it
+      for (var i = 0; i < this.buildings.length; i++) {
+        if (this.buildings[i].health <= 0) {
+          this.buildings.splice(this.buildings.indexOf(this.buildings[i]), 1);
+        }
+      }
+
+      //if a rocket has hit a building, remove it
+      for(var i = 0; i < this.rockets.length; i++){
+        if(this.rockets[i].isHit){
+          this.rockets.splice(this.rockets.indexOf(this.rockets[i]), 1);
+        }
+      }
+
+      //generate new rockets if some amount of rockets went off screen or hit something
+      while(this.rockets.length != this.numRockets){
+        this.rockets.push(new Rocket(this));
+      }
+
+      this.gun.update();
+      this.updateArr(this.rockets);
+      this.updateArr(this.bullets);
+      this.updateArr(this.buildings);
 
       if(this.displayed){
         background(200);
@@ -129,19 +88,40 @@ class Game{
         fill(0);
         text(this.score, 10, 30);
       }
-    }
-  }
-
-  display(){
-    if(this.displayed){
-      this.displayed = false;
-      this.canvas.hide();
     } else {
-      this.displayed = true;
-      this.canvas.show();
+      this.gameOver()
+      noLoop()
     }
   }
 
+  gameOver(){
+    push();
+    translate(this.canvas.width/2, this.canvas.height/2);
+    textSize(72);
+    textAlign(CENTER);
+    fill(0);
+    text("Game Over", 0, 0);
+    pop();
+    console.log("GAME OVER")
+  }
+
+  gameOverScenarios(){
+      //Game Over scenario - all buildings destroyed
+      if(this.buildings.length == 0){
+        console.log("all buildings destroyed")
+        this.isGameOver = true;
+      }
+
+      //Game Over scenario - gun is hit
+      for(var i = 0; i < this.rockets.length; i++){
+        let d = dist(this.rockets[i].pos.x, this.rockets[i].pos.y, width/2, height);
+        if(d <= this.rockets[i].width){
+          console.log("gun destroyed")
+          this.gun.height = 0;
+          this.isGameOver = true;
+        }
+      }
+  }
 
   resetSketch(){
     this.buildings = [];
@@ -164,19 +144,6 @@ class Game{
 
   }
 
-  mutateNN(){
-    $.ajax({
-      url: "http://127.0.0.1:5000/model/mutate",
-      data: "data=mutate",
-      dataType: 'json',
-      async: false,
-      success: function(){
-        this.generation += 1;
-        console.log("Current Generation: " + this.generation);
-      },
-    });
-  }
-
   // if object in array a goes outside the border of the window + a margin (account for rocket start above the screen), remove it from the array
   isOffscreen(a){
     var margin = 100;
@@ -186,17 +153,6 @@ class Game{
       }
     }
   }
-
-  calcClosestRocket(){
-    let best = this.rockets[0];
-    for(let i = 0; i < this.rockets.length; i++){
-      if(this.rockets[i].distFromGun < best.distFromGun){
-        best = this.rockets[i];
-      }
-    }
-    return best
-  }
-
   //update all ojects within array a
   updateArr(a){
     for(var i = 0; i < a.length; i++){
