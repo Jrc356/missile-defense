@@ -10,7 +10,6 @@ function draw(){
 
 function resetGame(){
   game = new Game(0)
-  game.setup()
   game.displayed = true
 }
 

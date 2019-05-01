@@ -1,5 +1,6 @@
 class Game{
   constructor(idx){
+    this.COLLISION_BUFFER = 20
     //containers
     this._id = idx;
     this.bullets = [];
@@ -12,7 +13,6 @@ class Game{
     this.numBuildings = 4;
     this.rocketMaxSpeed = 5;
     this.buildingHealth = 4;
-    this.isGameOver = false;
     this.numBullets = 100;
 
     //score settings
@@ -21,6 +21,8 @@ class Game{
 
     this.displayed = false;
     this.canvas;
+
+    this.setup()
   }
 
   setup(){
@@ -30,9 +32,7 @@ class Game{
   }
 
   draw(){
-    if(!this.isGameOver){
-      this.gameOverScenarios()
-      
+    if(!this.isGameOver()){
       if(this.bullets.length > this.numBullets){
         this.bullets.splice(0, 1);
       }
@@ -71,26 +71,35 @@ class Game{
         this.rockets.push(new Rocket(this));
       }
 
-      this.gun.update();
-      this.updateArr(this.rockets);
-      this.updateArr(this.bullets);
-      this.updateArr(this.buildings);
-
-      if(this.displayed){
-        background(200);
-        this.gun.show();
-        this.showArr(this.rockets);
-        this.showArr(this.bullets);
-        this.showArr(this.buildings);
-
-        //display score in top left corner
-        textSize(32);
-        fill(0);
-        text(this.score, 10, 30);
-      }
+      this.update()
+      this.show()
+      
     } else {
+      this.update()
+      this.show()
       this.gameOver()
-      noLoop()
+    }
+  }
+
+  update(){
+    this.gun.update();
+    this.updateArr(this.rockets);
+    this.updateArr(this.bullets);
+    this.updateArr(this.buildings);
+  }
+
+  show(){
+    if(this.displayed){
+      background(200);
+      this.gun.show();
+      this.showArr(this.rockets);
+      this.showArr(this.bullets);
+      this.showArr(this.buildings);
+
+      //display score in top left corner
+      textSize(32);
+      fill(0);
+      text(this.score, 10, 30);
     }
   }
 
@@ -103,36 +112,36 @@ class Game{
     text("Game Over", 0, 0);
     pop();
     console.log("GAME OVER")
+    noLoop()
   }
 
-  gameOverScenarios(){
+  isGameOver(){
       //Game Over scenario - all buildings destroyed
       if(this.buildings.length == 0){
         console.log("all buildings destroyed")
-        this.isGameOver = true;
+        return true
       }
 
       //Game Over scenario - gun is hit
       for(var i = 0; i < this.rockets.length; i++){
-        let d = dist(this.rockets[i].pos.x, this.rockets[i].pos.y, width/2, height);
+        let d = dist(this.rockets[i].pos.x, this.rockets[i].pos.y, width/2, height) + this.COLLISION_BUFFER;
         if(d <= this.rockets[i].width){
           console.log("gun destroyed")
           this.gun.height = 0;
-          this.isGameOver = true;
+          return true
         }
       }
+
+      return false
   }
 
   resetSketch(){
     this.buildings = [];
     this.rockets = [];
-    this.isGameOver = false;
     this.gun = new Gun(this);
     this.score = 0;
 
-
     //Create buildings
-
     for(var i = 0; i < this.numBuildings; i++){
       this.buildings.push(new Building(100+width/this.numBuildings * i, this));
     }

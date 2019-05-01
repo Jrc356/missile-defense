@@ -16,7 +16,7 @@ class Bullet{
   hasCollided(a){
     if(a[0] != null){
       for(var i = a.length-1; i >= 0; i--){
-        var d = dist(this.pos.x, this.pos.y, a[i].pos.x, a[i].pos.y);
+        var d = dist(a[i].pos.x, a[i].pos.y, this.pos.x, this.pos.y) + this.game.COLLISION_BUFFER;
         if(d <= a[i].width){
           a.splice(a.indexOf(a[i]), 1);
           this.hasHit = true;
@@ -27,8 +27,10 @@ class Bullet{
 
   show(){
     push();
+    translate(this.pos.x, this.pos.y)
     fill(0);
-    ellipse(this.pos.x, this.pos.y, 5);
+    ellipseMode(CENTER)
+    ellipse(0, 0, 5, 5);
     pop();
   }
 }

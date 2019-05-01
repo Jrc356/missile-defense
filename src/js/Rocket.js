@@ -6,20 +6,17 @@ class Rocket{
     this.vel = p5.Vector.random2D();
     this.vel.y = Math.floor(random(1, this.game.rocketMaxSpeed));
     this.pos = createVector(random(0,width), random(-50, 0));
-    this.distFromGun = 0
-
   }
 
   update(){
     this.pos.add(this.vel);
     this.hasCollided();
-    this.calcGunDistance();
   }
 
   hasCollided(){
     if(this.game.buildings[0] != null){
       for(var i = this.game.buildings.length-1; i >= 0; i--){
-        var d = dist(this.pos.x, this.pos.y, this.game.buildings[i].pos, height-this.game.buildings[i].height);
+        var d = dist(this.pos.x, this.pos.y, this.game.buildings[i].pos, height-this.game.buildings[i].height) + this.game.COLLISION_BUFFER;
         if(d <= this.width-1){
           this.game.buildings[i].health -= 1;
           this.isHit = true;
@@ -29,15 +26,12 @@ class Rocket{
     }
   }
 
-  calcGunDistance(){
-    this.distFromGun = dist(this.pos.x, this.pos.y, width/2, height)
-  }
-
   show(){
     push();
+    translate(this.pos.x, this.pos.y)
     fill(255);
     ellipseMode(CENTER);
-    ellipse(this.pos.x, this.pos.y, this.width/2, this.width);
+    ellipse(0, 0, this.width/2, this.width);
     pop();
   }
 

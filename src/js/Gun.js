@@ -26,9 +26,12 @@ class Gun{
       push();
       fill(0);
       translate(width/2, height);
+      ellipseMode(CENTER)
       ellipse(0, 0, 30, 30);
+      
       rotate(this.angle);
-      rect(-5, -this.height, 10, this.height);
+      rectMode(CENTER)
+      rect(0, -this.height, 10, this.height);
       pop();
     }
 
